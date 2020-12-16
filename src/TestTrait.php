@@ -10,6 +10,7 @@ use Eris\Random\MtRandSource;
 use Eris\Random\RandomRange;
 use Eris\Random\RandSource;
 use Eris\Shrinker\ShrinkerFactory;
+use PHPUnit\Util\Test as TestUtil;
 
 trait TestTrait
 {
@@ -51,7 +52,10 @@ trait TestTrait
                 return !($listener instanceof MinimumEvaluations);
             }
         );
-        $tags = $this->getAnnotations();//from TestCase of PHPunit
+        $tags = TestUtil::parseTestMethodAnnotations(
+            static::class,
+            $this->getName(false)
+        );
         $this->withRand($this->getAnnotationValue($tags, 'eris-method', 'rand', 'strval'));
         $this->iterations = $this->getAnnotationValue($tags, 'eris-repeat', 100, 'intval');
         $this->shrinkingTimeLimit = $this->getAnnotationValue($tags, 'eris-shrink', null, 'intval');
