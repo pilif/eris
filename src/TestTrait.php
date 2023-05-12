@@ -47,11 +47,19 @@ trait TestTrait
         if (\method_exists($this, 'getAnnotations')) {
             return $this->getAnnotations();
         }
-        //from TestCase of PHPunit
-        return \PHPUnit\Util\Test::parseTestMethodAnnotations(
+        if (\class_exists('\PHPUnit\Util\Test')
+            && \method_exists('\PHPUnit\Util\Test', 'parseTestMethodAnnotations')) {
+            //from TestCase of PHPunit
+            return \PHPUnit\Util\Test::parseTestMethodAnnotations(
+                get_class($this),
+                $this->getName(false)
+            );
+        }
+        $annotations = \PHPUnit\Metadata\Annotation\Parser\Registry::getInstance()->forMethod(
             get_class($this),
-            $this->getName(false)
-        );
+            $this->name()
+        )->symbolAnnotations();
+        return ['method' => $annotations];
     }
 
     /**
