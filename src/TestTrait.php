@@ -10,6 +10,9 @@ use Eris\Random\MtRandSource;
 use Eris\Random\RandomRange;
 use Eris\Random\RandSource;
 use Eris\Shrinker\ShrinkerFactory;
+use PHPUnit\Framework\Attributes\After;
+use PHPUnit\Framework\Attributes\Before;
+use PHPUnit\Framework\Attributes\BeforeClass;
 
 trait TestTrait
 {
@@ -27,9 +30,7 @@ trait TestTrait
     protected $seed;
     protected $shrinkingTimeLimit;
 
-    /**
-     * @beforeClass
-     */
+    #[BeforeClass]
     public static function erisSetupBeforeClass()
     {
         foreach (['Generator', 'Antecedent', 'Listener', 'Random'] as $namespace) {
@@ -44,27 +45,20 @@ trait TestTrait
      */
     public function getTestCaseAnnotations()
     {
-        if (\method_exists($this, 'getAnnotations')) {
-            return $this->getAnnotations();
-        }
-        if (\class_exists('\PHPUnit\Util\Test')
-            && \method_exists('\PHPUnit\Util\Test', 'parseTestMethodAnnotations')) {
-            //from TestCase of PHPunit
-            return \PHPUnit\Util\Test::parseTestMethodAnnotations(
+        if (\class_exists('\PHPUnit\Metadata\Annotation\Parser\Registry')) {
+            $annotations = \PHPUnit\Metadata\Annotation\Parser\Registry::getInstance()->forMethod(
                 get_class($this),
-                $this->getName(false)
-            );
+                $this->name()
+            )->symbolAnnotations();
+        } else {
+            $d = new DocBlockReader(get_class($this), $this->name());
+            $annotations = $d->getParameters();
         }
-        $annotations = \PHPUnit\Metadata\Annotation\Parser\Registry::getInstance()->forMethod(
-            get_class($this),
-            $this->name()
-        )->symbolAnnotations();
+
         return ['method' => $annotations];
     }
 
-    /**
-     * @before
-     */
+    #[Before]
     public function erisSetup()
     {
         $this->seedingRandomNumberGeneration();
@@ -123,9 +117,7 @@ trait TestTrait
         return isset($annotations['class'][$key])?$annotations['class'][$key]:[];
     }
 
-    /**
-     * @after
-     */
+    #[After]
     public function erisTeardown()
     {
         $this->dumpSeedForReproducing();
