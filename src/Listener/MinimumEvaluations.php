@@ -9,7 +9,7 @@ use Exception;
 class MinimumEvaluations extends EmptyListener implements Listener
 {
     private $threshold;
-    
+
     /**
      * @param float $threshold  from 0.0 to 1.0
      */
@@ -23,7 +23,7 @@ class MinimumEvaluations extends EmptyListener implements Listener
         $this->threshold = $threshold;
     }
 
-    public function endPropertyVerification($ordinaryEvaluations, $iterations, Exception $exception = null)
+    public function endPropertyVerification($ordinaryEvaluations, $iterations, ?Exception $exception = null)
     {
         if ($exception) {
             return;
